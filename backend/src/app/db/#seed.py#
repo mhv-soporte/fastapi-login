@@ -1,0 +1,25 @@
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
+
+from app.models.area import Area
+from app.models.role import Role
+from app.models.permission import Permission
+
+async def seed_data(session: AsyncSession):
+    # Areas
+    areas = ["Metro", "Nacional"]
+
+    for name in areas:
+        result = await session.execute(select(Area).where(Area.name == name))
+        if not result.scalar():
+            session.add(Area(name=name))
+
+    # Roles
+    roles = ["admin", "operador", "scraper", "analista"]
+
+    for name in roles:
+        result = await session.execute(select(Role).where(Role.name == name))
+        if not result.scalar():
+            session.add(Role(name=name))
+
+            # 
