@@ -17,10 +17,11 @@ async def seed_data(session: AsyncSession):
     # Roles
     roles = ["admin", "operador", "scraper", "anaista"]
 
-    for name in roles:
+    for role_name in roles:
         result = await session.execute(select(Role).where(Role.name == name))
-        if not result.scalar():
-            session.add(Role(name=name))
+        role = result.scalar_one_or_none
+        if not role:
+            session.add(Role(name=role_name))
 
     # Permisos
     permissions = [

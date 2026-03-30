@@ -2,6 +2,8 @@ import uuid
 from sqlalchemy import String, Boolean, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base
+from app.models.role import Role
+from app.models.user_role import user_roles
 
 class User(Base):
     __tablename__ = "users"

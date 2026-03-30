@@ -1,5 +1,6 @@
 import asyncio
 import app.db.models
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import async_sessionmaker
 from app.db.session import engine
 from app.models.user import User
@@ -9,6 +10,21 @@ AsyncSessionLocal = async_sessionmaker(engine, expire_on_commit=False)
 
 async def create_admin():
     async with AsyncSessionLocal() as session:
+        
+        # Buscar si ya existe por expediente o username
+        result = await session.execute(
+            select(User).where(
+                (User.expediente == "admin001") |
+                (User.username == "adminuser")
+            )
+        )
+        existing_user = result.scalar_one_or_none()
+
+        if existing_user:
+            print("Usuario ya existe")
+            return
+
+        # Crear usuario
         user = User(
             expediente="admin001",
             username="adminuser",
@@ -21,6 +37,9 @@ async def create_admin():
 
         session.add(user)
         await session.commit()
+
+        print("Admin creado correctamente")
+
 
 if __name__ == "__main__":
     asyncio.run(create_admin())

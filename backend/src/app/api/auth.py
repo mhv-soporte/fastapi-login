@@ -6,13 +6,17 @@ from app.db.session import get_db
 from app.models.user import User
 from app.core.hash import verify_password
 from app.core.security import create_access_token
+from app.schemas.auth import LoginRequest
 
 router = APIRouter()
 
 @router.post("/login")
-async def login(data: dict, db: AsyncSession = Depends(get_db)):
-    identifier = data.get("identifier")
-    password = data.get("password")
+async def login(data: LoginRequest, db: AsyncSession = Depends(get_db)):
+
+    identifier = data.identifier or data.username
+
+    if not identifier:
+        raise HTTPException(status_code=400, detail="Falta usuario")
 
     result = await db.execute(
         select(User).where(
@@ -22,7 +26,7 @@ async def login(data: dict, db: AsyncSession = Depends(get_db)):
     )
     user = result.scalar_one_or_none()
 
-    if not user or not verify_password(password, user.hashed_password):
+    if not user or not verify_password(data.password, user.hashed_password):
         raise HTTPException(status_code=400, detail="Credenciales inválidas")
 
     token = create_access_token({"sub": user.expediente})
